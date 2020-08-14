@@ -1,11 +1,18 @@
-import { StatusBar, Dimensions } from "react-native";
 import React from "react";
-import { StyleSheet, Text, View, Image, TextInput } from "react-native";
+import { StatusBar, Dimensions } from "react-native";
 import { Platform } from "react-native";
-import { ScrollView } from "react-native";
-import ToDo from "./ToDo";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TextInput,
+  ScrollView,
+  KeyboardAvoidingView,
+} from "react-native";
 import { AppLoading } from "expo";
 import uuid from "react-native-uuid";
+import ToDo from "./ToDo";
 
 const { height, width } = Dimensions.get("window");
 
@@ -14,9 +21,6 @@ export default class App extends React.Component {
     newToDo: "",
     loadedToDos: false,
     toDos: {},
-  };
-  componentDidMount = () => {
-    this._loadToDos();
   };
 
   _loadToDos = () => {
@@ -115,6 +119,10 @@ export default class App extends React.Component {
     });
   };
 
+  componentDidMount = () => {
+    this._loadToDos();
+  };
+
   render() {
     const { newToDo, loadedToDos, toDos } = this.state;
 
@@ -144,16 +152,21 @@ export default class App extends React.Component {
             onSubmitEditing={this._addToDo}
           ></TextInput>
           <ScrollView style={styles.scrollView}>
-            {Object.values(toDos).map((toDo) => (
-              <ToDo
-                key={toDo.id}
-                {...toDo}
-                deleteToDo={this._deleteToDo}
-                uncompleteToDo={this._uncompleteToDo}
-                completeToDo={this._completeToDo}
-                updateToDo={this._updateToDo}
-              />
-            ))}
+            <KeyboardAvoidingView
+              behavior={Platform.OS === "ios" ? "padding" : null}
+              keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
+            >
+              {Object.values(toDos).map((toDo) => (
+                <ToDo
+                  key={toDo.id}
+                  {...toDo}
+                  deleteToDo={this._deleteToDo}
+                  uncompleteToDo={this._uncompleteToDo}
+                  completeToDo={this._completeToDo}
+                  updateToDo={this._updateToDo}
+                />
+              ))}
+            </KeyboardAvoidingView>
           </ScrollView>
         </View>
       </View>

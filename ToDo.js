@@ -13,6 +13,21 @@ import propTypes from "prop-types";
 const { width, height } = Dimensions.get("window");
 
 export default class ToDo extends Component {
+  state = {
+    isEditing: false,
+    toDoValue: "",
+  };
+
+  static propTypes = {
+    id: propTypes.string.isRequired,
+    text: propTypes.string.isRequired,
+    isCompleted: propTypes.bool.isRequired,
+    deleteToDo: propTypes.func.isRequired,
+    uncompleteToDo: propTypes.func.isRequired,
+    completeToDo: propTypes.func.isRequired,
+    updateToDo: propTypes.func.isRequired,
+  };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -20,22 +35,6 @@ export default class ToDo extends Component {
       toDoValue: props.text,
     };
   }
-
-  static propTypes = {
-    text: propTypes.string.isRequired,
-    isCompleted: propTypes.bool.isRequired,
-    deleteToDo: propTypes.func.isRequired,
-    id: propTypes.string.isRequired,
-    uncompleteToDo: propTypes.func.isRequired,
-    completeToDo: propTypes.func.isRequired,
-    updateToDo: propTypes.func.isRequired,
-  };
-
-  state = {
-    isEditing: false,
-    // isCompleted: false,
-    toDoValue: "",
-  };
 
   _toggleComplete = () => {
     const { isCompleted, uncompleteToDo, completeToDo, id } = this.props;

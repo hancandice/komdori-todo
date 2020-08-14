@@ -4,20 +4,124 @@ import { StyleSheet, Text, View, Image, TextInput } from "react-native";
 import { Platform } from "react-native";
 import { ScrollView } from "react-native";
 import ToDo from "./ToDo";
+import { AppLoading } from "expo";
+import uuid from "react-native-uuid";
 
 const { height, width } = Dimensions.get("window");
 
 export default class App extends React.Component {
   state = {
     newToDo: "",
+    loadedToDos: false,
+    toDos: {},
   };
+  componentDidMount = () => {
+    this._loadToDos();
+  };
+
+  _loadToDos = () => {
+    this.setState({ loadedToDos: true });
+  };
+
   _controlNewToDo = (text) => {
     this.setState({
       newToDo: text,
     });
   };
-  render() {
+
+  _addToDo = () => {
     const { newToDo } = this.state;
+    if (newToDo !== "") {
+      this.setState((prevState) => {
+        const ID = uuid.v1();
+        const newToDoObject = {
+          [ID]: {
+            id: ID,
+            isCompleted: false,
+            text: newToDo,
+            createAt: Date.now(),
+          },
+        };
+        const newState = {
+          ...prevState,
+          newToDo: "",
+          toDos: {
+            ...prevState.toDos,
+            ...newToDoObject,
+          },
+        };
+        return { ...newState };
+      });
+    }
+  };
+
+  _deleteToDo = (id) => {
+    this.setState((prevState) => {
+      const toDos = prevState.toDos;
+      delete toDos[id];
+      const newState = {
+        ...prevState,
+        ...toDos,
+      };
+      return { ...newState };
+    });
+  };
+
+  _uncompleteToDo = (id) => {
+    this.setState((prevState) => {
+      const newState = {
+        ...prevState,
+        toDos: {
+          ...prevState.toDos,
+          [id]: {
+            ...prevState.toDos[id],
+            isCompleted: false,
+          },
+        },
+      };
+      return { ...newState };
+    });
+  };
+
+  _completeToDo = (id) => {
+    this.setState((prevState) => {
+      const newState = {
+        ...prevState,
+        toDos: {
+          ...prevState.toDos,
+          [id]: {
+            ...prevState.toDos[id],
+            isCompleted: true,
+          },
+        },
+      };
+      return { ...newState };
+    });
+  };
+
+  _updateToDo = (id, text) => {
+    this.setState((prevState) => {
+      const newState = {
+        ...prevState,
+        toDos: {
+          ...prevState.toDos,
+          [id]: {
+            ...prevState.toDos[id],
+            text: text,
+          },
+        },
+      };
+      return { ...newState };
+    });
+  };
+
+  render() {
+    const { newToDo, loadedToDos, toDos } = this.state;
+
+    if (!loadedToDos) {
+      return <AppLoading />;
+    }
+
     return (
       <View style={styles.container}>
         <StatusBar barStyle="light-content"></StatusBar>
@@ -36,9 +140,20 @@ export default class App extends React.Component {
             onChangeText={this._controlNewToDo}
             placeholderTextColor={"#999"}
             returnKeyType={"done"}
+            autoCorrect={false}
+            onSubmitEditing={this._addToDo}
           ></TextInput>
           <ScrollView style={styles.scrollView}>
-            <ToDo></ToDo>
+            {Object.values(toDos).map((toDo) => (
+              <ToDo
+                key={toDo.id}
+                {...toDo}
+                deleteToDo={this._deleteToDo}
+                uncompleteToDo={this._uncompleteToDo}
+                completeToDo={this._completeToDo}
+                updateToDo={this._updateToDo}
+              />
+            ))}
           </ScrollView>
         </View>
       </View>

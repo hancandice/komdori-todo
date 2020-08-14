@@ -1,16 +1,73 @@
 import React, { Component } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  TextInput,
+} from "react-native";
 import { Dimensions } from "react-native";
+import propTypes from "prop-types";
 
 const { width, height } = Dimensions.get("window");
 
 export default class ToDo extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isEditing: false,
+      toDoValue: props.text,
+    };
+  }
+
+  static propTypes = {
+    text: propTypes.string.isRequired,
+    isCompleted: propTypes.bool.isRequired,
+    deleteToDo: propTypes.func.isRequired,
+    id: propTypes.string.isRequired,
+    uncompleteToDo: propTypes.func.isRequired,
+    completeToDo: propTypes.func.isRequired,
+    updateToDo: propTypes.func.isRequired,
+  };
+
   state = {
     isEditing: false,
-    isCompleted: false,
+    // isCompleted: false,
+    toDoValue: "",
   };
+
+  _toggleComplete = () => {
+    const { isCompleted, uncompleteToDo, completeToDo, id } = this.props;
+    if (isCompleted) {
+      uncompleteToDo(id);
+    } else {
+      completeToDo(id);
+    }
+  };
+
+  _startEditing = () => {
+    this.setState({
+      isEditing: true,
+    });
+  };
+  _controlInput = (text) => {
+    this.setState({ toDoValue: text });
+  };
+
+  _finishEditing = () => {
+    const { toDoValue } = this.state;
+    const { id, updateToDo } = this.props;
+    updateToDo(id, toDoValue);
+    this.setState({
+      isEditing: false,
+    });
+  };
+
   render() {
-    const { isCompleted, isEditing } = this.state;
+    const { isEditing, toDoValue } = this.state;
+    const { text, id, deleteToDo, isCompleted } = this.props;
+
     return (
       <View style={styles.container}>
         <View style={styles.column}>
@@ -27,14 +84,29 @@ export default class ToDo extends Component {
               ></Image>
             )}
           </TouchableOpacity>
-          <Text
-            style={[
-              styles.text,
-              isCompleted ? styles.completedText : styles.uncompletedText,
-            ]}
-          >
-            Going to the school
-          </Text>
+          {isEditing ? (
+            <TextInput
+              style={[
+                styles.text,
+                styles.input,
+                isCompleted ? styles.completedText : styles.uncompletedText,
+              ]}
+              value={toDoValue}
+              multiline={true}
+              onChange={(event) => this._controlInput(event.nativeEvent.text)}
+              returnKeyType={"done"}
+              onBlur={this._finishEditing}
+            ></TextInput>
+          ) : (
+            <Text
+              style={[
+                styles.text,
+                isCompleted ? styles.completedText : styles.uncompletedText,
+              ]}
+            >
+              {text}
+            </Text>
+          )}
         </View>
         {isEditing ? (
           <View style={styles.actions}>
@@ -51,7 +123,7 @@ export default class ToDo extends Component {
                 <Text style={styles.actionText}>✏️</Text>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity onPressOut={() => deleteToDo(id)}>
               <View style={styles.actionContainer}>
                 <Text style={styles.actionText}>🔥</Text>
               </View>
@@ -61,26 +133,6 @@ export default class ToDo extends Component {
       </View>
     );
   }
-
-  _toggleComplete = () => {
-    this.setState((prevState) => {
-      return {
-        isCompleted: !prevState.isCompleted,
-      };
-    });
-  };
-
-  _startEditing = () => {
-    this.setState({
-      isEditing: true,
-    });
-  };
-
-  _finishEditing = () => {
-    this.setState({
-      isEditing: false,
-    });
-  };
 }
 
 const styles = StyleSheet.create({
@@ -99,6 +151,7 @@ const styles = StyleSheet.create({
   },
   completedCircle: {},
   uncompletedCircle: {},
+
   text: {
     fontWeight: "600",
     fontSize: 20,
@@ -110,6 +163,10 @@ const styles = StyleSheet.create({
   },
   uncompletedText: {
     color: "#2c2c2c",
+  },
+  input: {
+    marginTop: 15,
+    width: width / 2,
   },
   column: {
     flex: 3,

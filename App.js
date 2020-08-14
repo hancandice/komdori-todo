@@ -131,21 +131,26 @@ export default class App extends React.Component {
     }
 
     return (
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : null}
-        style={{ flex: 1, flexDirection: "column", justifyContent: "center" }}
-        enabled
-      >
-        <View style={styles.container}>
-          <StatusBar barStyle="light-content"></StatusBar>
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content"></StatusBar>
 
-          <View style={styles.title}>
-            <Text style={styles.titleText}>Komdori Todo</Text>
-            <Image
-              style={styles.titleLogo}
-              source={require("./static/i-2.png")}
-            ></Image>
-          </View>
+        <View style={styles.title}>
+          <Text style={styles.titleText}>Komdori Todo</Text>
+          <Image
+            style={styles.titleLogo}
+            source={require("./static/i-2.png")}
+          ></Image>
+        </View>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : null}
+          style={{
+            flex: 1,
+            flexDirection: "column",
+            justifyContent: "center",
+          }}
+          enabled
+          // keyboardVerticalOffset={20}
+        >
           <View style={styles.card}>
             <TextInput
               style={styles.input}
@@ -170,8 +175,8 @@ export default class App extends React.Component {
               ))}
             </ScrollView>
           </View>
-        </View>
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
+      </View>
     );
   }
 }

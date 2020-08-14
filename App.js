@@ -131,31 +131,33 @@ export default class App extends React.Component {
     }
 
     return (
-      <View style={styles.container}>
-        <StatusBar barStyle="light-content"></StatusBar>
-        <View style={styles.title}>
-          <Text style={styles.titleText}>Komdori Todo</Text>
-          <Image
-            style={styles.titleLogo}
-            source={require("./static/i-2.png")}
-          ></Image>
-        </View>
-        <View style={styles.card}>
-          <TextInput
-            style={styles.input}
-            placeholder={"New To Do"}
-            value={newToDo}
-            onChangeText={this._controlNewToDo}
-            placeholderTextColor={"#999"}
-            returnKeyType={"done"}
-            autoCorrect={false}
-            onSubmitEditing={this._addToDo}
-          ></TextInput>
-          <ScrollView style={styles.scrollView}>
-            <KeyboardAvoidingView
-              behavior={Platform.OS === "ios" ? "padding" : null}
-              keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
-            >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : null}
+        style={{ flex: 1, flexDirection: "column", justifyContent: "center" }}
+        enabled
+      >
+        <View style={styles.container}>
+          <StatusBar barStyle="light-content"></StatusBar>
+
+          <View style={styles.title}>
+            <Text style={styles.titleText}>Komdori Todo</Text>
+            <Image
+              style={styles.titleLogo}
+              source={require("./static/i-2.png")}
+            ></Image>
+          </View>
+          <View style={styles.card}>
+            <TextInput
+              style={styles.input}
+              placeholder={"New To Do"}
+              value={newToDo}
+              onChangeText={this._controlNewToDo}
+              placeholderTextColor={"#999"}
+              returnKeyType={"done"}
+              autoCorrect={false}
+              onSubmitEditing={this._addToDo}
+            ></TextInput>
+            <ScrollView style={styles.scrollView}>
               {Object.values(toDos).map((toDo) => (
                 <ToDo
                   key={toDo.id}
@@ -166,10 +168,10 @@ export default class App extends React.Component {
                   updateToDo={this._updateToDo}
                 />
               ))}
-            </KeyboardAvoidingView>
-          </ScrollView>
+            </ScrollView>
+          </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     );
   }
 }
@@ -179,7 +181,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "black",
     alignItems: "center",
-    justifyContent: "flex-start",
   },
   title: {
     flexDirection: "row",

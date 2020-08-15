@@ -15,10 +15,16 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.geekjeeyoung.komdoritodo"
+    },
+    "android": {
+      "package": "com.geekjeeyoung.komdoritodo"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "description": "To Do Checklist App made with React Native ",
+    "githubUrl": "https://github.com/hancandice/komdori-todo"
   }
 }

@@ -23,10 +23,6 @@ export default class App extends React.Component {
     toDos: {},
   };
 
-  componentDidMount = () => {
-    this._loadToDos();
-  };
-
   render() {
     const { newToDo, loadedToDos, toDos } = this.state;
 
@@ -85,6 +81,7 @@ export default class App extends React.Component {
       </View>
     );
   }
+
   _controlNewToDo = (text) => {
     this.setState({
       newToDo: text,
@@ -186,29 +183,25 @@ export default class App extends React.Component {
     const saveToDos = AsyncStorage.setItem("toDos", JSON.stringify(newToDos));
   };
 
+  componentDidMount() {
+    this._loadToDos();
+    this.setState({ loadedToDos: true });
+  }
+
   _loadToDos = async () => {
     try {
       const toDos = await AsyncStorage.getItem("toDos");
       const parsedToDos = JSON.parse(toDos);
-      this.setState({
-        toDos: parsedToDos,
-        loadedToDos: true,
-      });
-    } catch (err) {
-      console.log(err);
-      this.setState({
-        loadedToDos: true,
-      });
+      if (toDos != null) {
+        this.setState({
+          toDos: parsedToDos,
+        });
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
-
-  // _loadToDos = () => {
-  //   this.setState({
-  //     loadedToDos: true,
-  //   });
-  // };
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

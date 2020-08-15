@@ -1,5 +1,5 @@
 import React from "react";
-import { StatusBar, Dimensions } from "react-native";
+import { StatusBar, Dimensions, AsyncStorage } from "react-native";
 import { Platform } from "react-native";
 import {
   StyleSheet,
@@ -21,102 +21,6 @@ export default class App extends React.Component {
     newToDo: "",
     loadedToDos: false,
     toDos: {},
-  };
-
-  _loadToDos = () => {
-    this.setState({ loadedToDos: true });
-  };
-
-  _controlNewToDo = (text) => {
-    this.setState({
-      newToDo: text,
-    });
-  };
-
-  _addToDo = () => {
-    const { newToDo } = this.state;
-    if (newToDo !== "") {
-      this.setState((prevState) => {
-        const ID = uuid.v1();
-        const newToDoObject = {
-          [ID]: {
-            id: ID,
-            isCompleted: false,
-            text: newToDo,
-            createAt: Date.now(),
-          },
-        };
-        const newState = {
-          ...prevState,
-          newToDo: "",
-          toDos: {
-            ...prevState.toDos,
-            ...newToDoObject,
-          },
-        };
-        return { ...newState };
-      });
-    }
-  };
-
-  _deleteToDo = (id) => {
-    this.setState((prevState) => {
-      const toDos = prevState.toDos;
-      delete toDos[id];
-      const newState = {
-        ...prevState,
-        ...toDos,
-      };
-      return { ...newState };
-    });
-  };
-
-  _uncompleteToDo = (id) => {
-    this.setState((prevState) => {
-      const newState = {
-        ...prevState,
-        toDos: {
-          ...prevState.toDos,
-          [id]: {
-            ...prevState.toDos[id],
-            isCompleted: false,
-          },
-        },
-      };
-      return { ...newState };
-    });
-  };
-
-  _completeToDo = (id) => {
-    this.setState((prevState) => {
-      const newState = {
-        ...prevState,
-        toDos: {
-          ...prevState.toDos,
-          [id]: {
-            ...prevState.toDos[id],
-            isCompleted: true,
-          },
-        },
-      };
-      return { ...newState };
-    });
-  };
-
-  _updateToDo = (id, text) => {
-    this.setState((prevState) => {
-      const newState = {
-        ...prevState,
-        toDos: {
-          ...prevState.toDos,
-          [id]: {
-            ...prevState.toDos[id],
-            text: text,
-          },
-        },
-      };
-      return { ...newState };
-    });
   };
 
   componentDidMount = () => {
@@ -163,22 +67,146 @@ export default class App extends React.Component {
               onSubmitEditing={this._addToDo}
             ></TextInput>
             <ScrollView style={styles.scrollView}>
-              {Object.values(toDos).map((toDo) => (
-                <ToDo
-                  key={toDo.id}
-                  {...toDo}
-                  deleteToDo={this._deleteToDo}
-                  uncompleteToDo={this._uncompleteToDo}
-                  completeToDo={this._completeToDo}
-                  updateToDo={this._updateToDo}
-                />
-              ))}
+              {Object.values(toDos)
+                .reverse()
+                .map((toDo) => (
+                  <ToDo
+                    key={toDo.id}
+                    {...toDo}
+                    deleteToDo={this._deleteToDo}
+                    uncompleteToDo={this._uncompleteToDo}
+                    completeToDo={this._completeToDo}
+                    updateToDo={this._updateToDo}
+                  />
+                ))}
             </ScrollView>
           </View>
         </KeyboardAvoidingView>
       </View>
     );
   }
+  _controlNewToDo = (text) => {
+    this.setState({
+      newToDo: text,
+    });
+  };
+
+  _addToDo = () => {
+    const { newToDo } = this.state;
+    if (newToDo !== "") {
+      this.setState((prevState) => {
+        const ID = uuid.v1();
+        const newToDoObject = {
+          [ID]: {
+            id: ID,
+            isCompleted: false,
+            text: newToDo,
+            createAt: Date.now(),
+          },
+        };
+        const newState = {
+          ...prevState,
+          newToDo: "",
+          toDos: {
+            ...prevState.toDos,
+            ...newToDoObject,
+          },
+        };
+        this._saveToDos(newState.toDos);
+        return { ...newState };
+      });
+    }
+  };
+
+  _deleteToDo = (id) => {
+    this.setState((prevState) => {
+      const toDos = prevState.toDos;
+      delete toDos[id];
+      const newState = {
+        ...prevState,
+        ...toDos,
+      };
+      this._saveToDos(newState.toDos);
+      return { ...newState };
+    });
+  };
+
+  _uncompleteToDo = (id) => {
+    this.setState((prevState) => {
+      const newState = {
+        ...prevState,
+        toDos: {
+          ...prevState.toDos,
+          [id]: {
+            ...prevState.toDos[id],
+            isCompleted: false,
+          },
+        },
+      };
+      this._saveToDos(newState.toDos);
+      return { ...newState };
+    });
+  };
+
+  _completeToDo = (id) => {
+    this.setState((prevState) => {
+      const newState = {
+        ...prevState,
+        toDos: {
+          ...prevState.toDos,
+          [id]: {
+            ...prevState.toDos[id],
+            isCompleted: true,
+          },
+        },
+      };
+      this._saveToDos(newState.toDos);
+      return { ...newState };
+    });
+  };
+
+  _updateToDo = (id, text) => {
+    this.setState((prevState) => {
+      const newState = {
+        ...prevState,
+        toDos: {
+          ...prevState.toDos,
+          [id]: {
+            ...prevState.toDos[id],
+            text: text,
+          },
+        },
+      };
+      this._saveToDos(newState.toDos);
+      return { ...newState };
+    });
+  };
+
+  _saveToDos = (newToDos) => {
+    const saveToDos = AsyncStorage.setItem("toDos", JSON.stringify(newToDos));
+  };
+
+  _loadToDos = async () => {
+    try {
+      const toDos = await AsyncStorage.getItem("toDos");
+      const parsedToDos = JSON.parse(toDos);
+      this.setState({
+        toDos: parsedToDos,
+        loadedToDos: true,
+      });
+    } catch (err) {
+      console.log(err);
+      this.setState({
+        loadedToDos: true,
+      });
+    }
+  };
+
+  // _loadToDos = () => {
+  //   this.setState({
+  //     loadedToDos: true,
+  //   });
+  // };
 }
 
 const styles = StyleSheet.create({
